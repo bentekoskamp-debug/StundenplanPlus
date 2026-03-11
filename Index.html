@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#7c6dfa">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Stundenplan+">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Stundenplan+</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --card: #1a1a24;
+    --border: rgba(255,255,255,0.07);
+    --accent: #7c6dfa;
+    --accent2: #fa6d8f;
+    --green: #4dffa0;
+    --yellow: #ffd166;
+    --red: #ff6b6b;
+    --text: #f0f0f8;
+    --muted: #6b6b8a;
+    --radius: 18px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  #install-banner {
+    display: none;
+    position: fixed;
+    bottom: 80px;
+    left: 1rem; right: 1rem;
+    background: var(--card);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 1rem 1.2rem;
+    z-index: 999;
+    box-shadow: 0 8px 32px rgba(124,109,250,0.25);
+    animation: slideUp 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .install-banner-inner { display:flex; align-items:center; gap:1rem; }
+  .install-icon { width:48px; height:48px; border-radius:12px; background:linear-gradient(135deg,var(--accent),var(--accent2)); display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0; }
+  .install-text { flex:1; }
+  .install-text strong { font-family:'Syne',sans-serif; font-weight:700; display:block; font-size:0.9rem; }
+  .install-text span { font-size:0.75rem; color:var(--muted); }
+  .install-btn { background:linear-gradient(135deg,var(--accent),#9d8ffe); border:none; border-radius:10px; color:white; font-family:'Syne',sans-serif; font-weight:700; font-size:0.8rem; padding:0.5rem 0.9rem; cursor:pointer; white-space:nowrap; }
+  .install-close { position:absolute; top:0.6rem; right:0.8rem; background:none; border:none; color:var(--muted); font-size:1rem; cursor:pointer; padding:0.2rem; }
+  #ios-hint { display:none; position:fixed; bottom:80px; left:1rem; right:1rem; background:var(--card); border:1px solid var(--accent); border-radius:var(--radius); padding:1rem 1.2rem; z-index:999; font-size:0.82rem; line-height:1.6; box-shadow:0 8px 32px rgba(124,109,250,0.25); animation:slideUp 0.4s ease; }
+  #ios-hint strong { font-family:'Syne',sans-serif; font-weight:700; display:block; margin-bottom:0.4rem; }
+  #login-screen { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2rem; background: radial-gradient(ellipse at 25% 15%, rgba(124,109,250,0.18) 0%, transparent 55%), radial-gradient(ellipse at 75% 85%, rgba(250,109,143,0.12) 0%, transparent 55%), var(--bg); }
+  .login-logo { font-family:'Syne',sans-serif; font-weight:800; font-size:2.4rem; background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:0.2rem; }
+  .login-sub { color:var(--muted); font-size:0.82rem; margin-bottom:2.5rem; }
+  .login-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:1.8rem; width:100%; max-width:360px; box-shadow:0 24px 64px rgba(0,0,0,0.5); }
+  .field-label { font-size:0.72rem; color:var(--muted); font-family:'Syne',sans-serif; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:0.4rem; }
+  .field { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:0.85rem 1rem; color:var(--text); font-family:'DM Sans',sans-serif; font-size:0.95rem; width:100%; outline:none; transition:border-color 0.2s; margin-bottom:1rem; -webkit-appearance:none; }
+  .field:focus { border-color:var(--accent); }
+  .or-divider { display:flex; align-items:center; gap:0.8rem; margin:0.5rem 0 1rem; color:var(--muted); font-size:0.75rem; }
+  .or-divider::before, .or-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+  .ms-btn { width:100%; padding:0.85rem; background:#2b4fa8; border:none; border-radius:12px; color:#fff; font-family:'Syne',sans-serif; font-weight:700; font-size:0.9rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.6rem; margin-bottom:1rem; }
+  .ms-btn:active { background:#1e3a8a; }
+  .login-btn { width:100%; padding:0.9rem; background:linear-gradient(135deg,var(--accent),#9d8ffe); border:none; border-radius:12px; color:#fff; font-family:'Syne',sans-serif; font-weight:700; font-size:0.95rem; cursor:pointer; }
+  .demo-hint { margin-top:1.2rem; text-align:center; font-size:0.8rem; color:var(--muted); }
+  .demo-hint span { color:var(--accent); cursor:pointer; text-decoration:underline; }
+  #app { display:none; padding-bottom:calc(70px + env(safe-area-inset-bottom)); }
+  .topbar { display:flex; align-items:center; justify-content:space-between; padding:1.2rem 1.2rem 0.8rem; position:sticky; top:0; z-index:100; background:rgba(10,10,15,0.92); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); }
+  .topbar-logo { font-family:'Syne',sans-serif; font-weight:800; font-size:1.3rem; background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .topbar-right { display:flex; gap:0.6rem; align-items:center; }
+  .topbar-user { font-size:0.78rem; color:var(--muted); }
+  .avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent2)); display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-weight:700; font-size:0.85rem; color:white; }
+  .week-nav { display:flex; align-items:center; justify-content:space-between; padding:0.8rem 1.2rem; }
+  .week-center { text-align:center; }
+  .week-label { font-family:'Syne',sans-serif; font-weight:700; font-size:1rem; }
+  .week-sub { font-size:0.75rem; color:var(--muted); font-weight:300; }
+  .nav-btn { background:var(--card); border:1px solid var(--border); border-radius:10px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text); font-size:1.1rem; }
+  .nav-btn:active { background:var(--accent); }
+  .day-pills { display:flex; gap:0.45rem; padding:0 1.2rem 0.8rem; overflow-x:auto; scrollbar-width:none; }
+  .day-pills::-webkit-scrollbar { display:none; }
+  .day-pill { flex-shrink:0; min-width:46px; padding:0.4rem 0.7rem; border-radius:16px; border:1px solid var(--border); background:var(--card); font-family:'Syne',sans-serif; font-size:0.7rem; font-weight:600; cursor:pointer; color:var(--muted); display:flex; flex-direction:column; align-items:center; gap:0.1rem; }
+  .day-pill .dn { font-size:1rem; font-weight:800; color:var(--text); }
+  .day-pill.active { background:linear-gradient(135deg,var(--accent),#9d8ffe); border-color:transparent; color:white; }
+  .day-pill.active .dn { color:white; }
+  .day-pill.today:not(.active) { border-color:var(--accent); }
+  .alerts-section { padding:0 1.2rem 0.6rem; }
+  .alert-card { background:rgba(255,107,107,0.1); border:1px solid rgba(255,107,107,0.25); border-radius:14px; padding:0.75rem 1rem; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.8rem; animation:slideIn 0.3s ease; }
+  .alert-card.sub { background:rgba(77,255,160,0.08); border-color:rgba(77,255,160,0.22); }
+  .alert-card.changed { background:rgba(255,209,102,0.08); border-color:rgba(255,209,102,0.22); }
+  .alert-icon { font-size:1.1rem; flex-shrink:0; }
+  .alert-text { font-size:0.8rem; line-height:1.4; }
+  .alert-text strong { font-family:'Syne',sans-serif; font-weight:700; display:block; font-size:0.82rem; }
+  .lessons { padding:0 1.2rem; display:flex; flex-direction:column; gap:0.65rem; }
+  .time-block { display:flex; gap:0.75rem; align-items:flex-start; }
+  .time-col { width:42px; flex-shrink:0; padding-top:0.85rem; text-align:right; }
+  .time-start { font-size:0.76rem; font-family:'Syne',sans-serif; font-weight:700; color:var(--muted); }
+  .time-end { font-size:0.62rem; color:var(--muted); opacity:0.45; }
+  .lesson-card { flex:1; background:var(--card); border:1px solid var(--border); border-left:4px solid var(--accent); border-radius:0 var(--radius) var(--radius) 0; padding:0.8rem 1rem; position:relative; overflow:hidden; cursor:pointer; animation:fadeUp 0.3s ease both; }
+  .lesson-card::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.07),transparent); }
+  .lesson-card:active { transform:scale(0.98); }
+  .lesson-card.cancelled { border-left-color:var(--red); opacity:0.65; }
+  .lesson-card.substitution { border-left-color:var(--green); }
+  .lesson-card.changed { border-left-color:var(--yellow); }
+  .lesson-subject { font-family:'Syne',sans-serif; font-weight:800; font-size:0.95rem; margin-bottom:0.25rem; }
+  .lesson-card.cancelled .lesson-subject { text-decoration:line-through; color:var(--red); }
+  .lesson-meta { display:flex; gap:0.6rem; flex-wrap:wrap; }
+  .meta-chip { font-size:0.7rem; color:var(--muted); display:flex; align-items:center; gap:0.2rem; }
+  .status-badge { position:absolute; top:0.65rem; right:0.75rem; font-size:0.6rem; font-family:'Syne',sans-serif; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; padding:0.18rem 0.45rem; border-radius:5px; }
+  .badge-cancelled { background:rgba(255,107,107,0.2); color:var(--red); }
+  .badge-sub { background:rgba(77,255,160,0.15); color:var(--green); }
+  .badge-changed { background:rgba(255,209,102,0.15); color:var(--yellow); }
+  .extra-info { margin-top:0.4rem; font-size:0.75rem; font-weight:500; }
+  .extra-info.green { color:var(--green); }
+  .extra-info.yellow { color:var(--yellow); }
+  .empty-day { text-align:center; padding:3rem 1rem; color:var(--muted); }
+  .empty-day .emoji { font-size:2.5rem; margin-bottom:0.8rem; }
+  .empty-day p { font-family:'Syne',sans-serif; font-weight:700; font-size:1rem; color:var(--text); margin-bottom:0.4rem; }
+  .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:rgba(19,19,26,0.95); border-top:1px solid var(--border); display:flex; padding:0.5rem 0 calc(0.5rem + env(safe-area-inset-bottom)); backdrop-filter:blur(20px); z-index:100; }
+  .nav-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:0.2rem; cursor:pointer; padding:0.3rem; }
+  .nav-icon { font-size:1.25rem; }
+  .nav-text { font-size:0.62rem; font-family:'Syne',sans-serif; font-weight:600; color:var(--muted); }
+  .nav-item.active .nav-text { color:var(--accent); }
+  #ms-modal { display:none; position:fixed; inset:0; z-index:200; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:2rem; }
+  #ms-modal.show { display:flex; }
+  .ms-modal-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:2rem; width:100%; max-width:320px; animation:fadeUp 0.3s ease; }
+  .ms-modal-logo { font-family:'Syne',sans-serif; font-weight:800; font-size:1.1rem; color:var(--text); margin-bottom:0.3rem; display:flex; align-items:center; gap:0.5rem; }
+  .ms-modal-sub { font-size:0.78rem; color:var(--muted); margin-bottom:1.5rem; }
+  .ms-notice { background:rgba(124,109,250,0.1); border:1px solid rgba(124,109,250,0.2); border-radius:10px; padding:0.8rem; font-size:0.78rem; line-height:1.5; margin-bottom:1.2rem; color:var(--text); }
+  .ms-notice strong { color:var(--accent); }
+  .modal-close-btn { width:100%; padding:0.8rem; background:var(--surface); border:1px solid var(--border); border-radius:10px; color:var(--muted); font-family:'Syne',sans-serif; font-weight:700; cursor:pointer; font-size:0.85rem; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes slideIn { from { opacity:0; transform:translateX(-8px); } to { opacity:1; transform:translateX(0); } }
+  @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+</style>
+</head>
+<body>
+
+<div id="install-banner">
+  <button class="install-close" onclick="dismissInstall()">✕</button>
+  <div class="install-banner-inner">
+    <div class="install-icon">📅</div>
+    <div class="install-text">
+      <strong>Als App installieren</strong>
+      <span>Schneller Zugriff vom Startbildschirm</span>
+    </div>
+    <button class="install-btn" onclick="triggerInstall()">Installieren</button>
+  </div>
+</div>
+
+<div id="ios-hint">
+  <button class="install-close" onclick="document.getElementById('ios-hint').style.display='none'">✕</button>
+  <strong>📲 Als App speichern (iPhone/iPad)</strong>
+  Tippe unten auf <strong>Teilen</strong> (⬆️), dann auf <strong>„Zum Home-Bildschirm"</strong> — fertig!
+</div>
+
+<div id="ms-modal">
+  <div class="ms-modal-card">
+    <div class="ms-modal-logo">⊞ Microsoft 365 Login</div>
+    <div class="ms-modal-sub">Schulkonto verbinden</div>
+    <div class="ms-notice"><strong>Hinweis:</strong> Microsoft-Login funktioniert nur, wenn deine Schule das in WebUntis aktiviert hat.</div>
+    <button class="login-btn" style="margin-bottom:0.8rem" onclick="msLoginDemo()">Demo – trotzdem einloggen</button>
+    <button class="modal-close-btn" onclick="closeMsModal()">Abbrechen</button>
+  </div>
+</div>
+
+<div id="login-screen">
+  <div class="login-logo">stundenplan+</div>
+  <div class="login-sub">Powered by WebUntis · Als App installierbar</div>
+  <div class="login-card">
+    <div class="field-label">Schule / Server</div>
+    <input class="field" id="school" placeholder="z.B. meine-schule" type="text">
+    <button class="ms-btn" onclick="openMsModal()">⊞ Mit Microsoft 365 anmelden</button>
+    <div class="or-divider">oder manuell</div>
+    <div class="field-label">Benutzername</div>
+    <input class="field" id="username" placeholder="WebUntis Benutzername" type="text">
+    <div class="field-label">Passwort</div>
+    <input class="field" id="password" placeholder="••••••••" type="password">
+    <button class="login-btn" onclick="doLogin()">Anmelden</button>
+    <div class="demo-hint">Kein Account? <span onclick="loadDemo()">Demo starten</span></div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-logo">stundenplan+</div>
+    <div class="topbar-right">
+      <span class="topbar-user" id="user-display"></span>
+      <div class="avatar" id="avatar">?</div>
+    </div>
+  </div>
+  <div class="week-nav">
+    <button class="nav-btn" onclick="changeWeek(-1)">‹</button>
+    <div class="week-center">
+      <div class="week-label" id="week-label">KW –</div>
+      <div class="week-sub" id="week-range">–</div>
+    </div>
+    <button class="nav-btn" onclick="changeWeek(1)">›</button>
+  </div>
+  <div class="day-pills" id="day-pills"></div>
+  <div class="alerts-section" id="alerts"></div>
+  <div class="lessons" id="lessons"></div>
+  <nav class="bottom-nav">
+    <div class="nav-item active" onclick="setTab(0,this)">
+      <span class="nav-icon">📅</span><span class="nav-text">Stundenplan</span>
+    </div>
+    <div class="nav-item" onclick="setTab(1,this)">
+      <span class="nav-icon">🔄</span><span class="nav-text">Vertretungen</span>
+    </div>
+    <div class="nav-item" onclick="setTab(2,this)">
+      <span class="nav-icon">📣</span><span class="nav-text">Mitteilungen</span>
+    </div>
+    <div class="nav-item" onclick="setTab(3,this)">
+      <span class="nav-icon">⚙️</span><span class="nav-text">Einstellungen</span>
+    </div>
+  </nav>
+</div>
+
+<script>
+const TIMETABLE={0:[{p:1,s:'07:45',e:'08:30',sub:'Deutsch',t:'Fr. Müller',r:'A102',c:'#7c6dfa'},{p:2,s:'08:35',e:'09:20',sub:'Mathematik',t:'Hr. Weber',r:'A104',c:'#fa6d8f'},{p:3,s:'09:35',e:'10:20',sub:'Englisch',t:'Fr. Köhler',r:'B201',c:'#4dffa0',st:'substitution',xi:'Vertretung: Hr. Braun'},{p:4,s:'10:25',e:'11:10',sub:'Physik',t:'Hr. Schmidt',r:'C301',c:'#ffd166'},{p:5,s:'11:25',e:'12:10',sub:'Sport',t:'Fr. Fischer',r:'Sporthalle',c:'#fa6d8f'},{p:6,s:'12:15',e:'13:00',sub:'Geschichte',t:'Hr. Wagner',r:'A105',c:'#7c6dfa'}],1:[{p:1,s:'07:45',e:'08:30',sub:'Mathematik',t:'Hr. Weber',r:'A104',c:'#fa6d8f'},{p:2,s:'08:35',e:'09:20',sub:'Biologie',t:'Fr. Bauer',r:'D201',c:'#4dffa0',st:'changed',xi:'Raum geändert → D203'},{p:3,s:'09:35',e:'10:20',sub:'Chemie',t:'Hr. Schulz',r:'Labor 1',c:'#ffd166'},{p:4,s:'10:25',e:'11:10',sub:'Deutsch',t:'Fr. Müller',r:'A102',c:'#7c6dfa',st:'cancelled'},{p:5,s:'11:25',e:'12:10',sub:'Kunst',t:'Fr. Richter',r:'E101',c:'#fa9e6d'}],2:[{p:1,s:'07:45',e:'08:30',sub:'Englisch',t:'Fr. Köhler',r:'B201',c:'#4dffa0'},{p:2,s:'08:35',e:'09:20',sub:'Mathematik',t:'Hr. Weber',r:'A104',c:'#fa6d8f'},{p:5,s:'11:25',e:'12:10',sub:'Informatik',t:'Hr. Klein',r:'PC-Raum',c:'#7c6dfa',st:'substitution',xi:'Vertretung: Fr. Hofmann'},{p:6,s:'12:15',e:'13:00',sub:'Religion',t:'Fr. Wolf',r:'A106',c:'#ffd166'}],3:[{p:1,s:'07:45',e:'08:30',sub:'Physik',t:'Hr. Schmidt',r:'C301',c:'#ffd166'},{p:2,s:'08:35',e:'09:20',sub:'Deutsch',t:'Fr. Müller',r:'A102',c:'#7c6dfa'},{p:3,s:'09:35',e:'10:20',sub:'Mathematik',t:'Hr. Weber',r:'A104',c:'#fa6d8f',st:'cancelled'},{p:4,s:'10:25',e:'11:10',sub:'Geschichte',t:'Hr. Wagner',r:'A105',c:'#7c6dfa'},{p:5,s:'11:25',e:'12:10',sub:'Englisch',t:'Fr. Köhler',r:'B201',c:'#4dffa0'},{p:6,s:'12:15',e:'13:00',sub:'Biologie',t:'Fr. Bauer',r:'D201',c:'#4dffa0'}],4:[{p:1,s:'07:45',e:'08:30',sub:'Chemie',t:'Hr. Schulz',r:'Labor 1',c:'#ffd166'},{p:2,s:'08:35',e:'09:20',sub:'Kunst',t:'Fr. Richter',r:'E101',c:'#fa9e6d'},{p:3,s:'09:35',e:'10:20',sub:'Sport',t:'Fr. Fischer',r:'Sporthalle',c:'#fa6d8f'},{p:4,s:'10:25',e:'11:10',sub:'Deutsch',t:'Fr. Müller',r:'A102',c:'#7c6dfa'}]};
+const DAY_SHORT=['Mo','Di','Mi','Do','Fr'];
+let weekOffset=0,dayIdx=0,currentUser='';
+function getMonday(off=0){const n=new Date(),d=n.getDay(),diff=d===0?-6:1-d,m=new Date(n);m.setDate(n.getDate()+diff+off*7);m.setHours(0,0,0,0);return m;}
+function fmt(d){return d.getDate()+'.'+(d.getMonth()+1)+'.';}
+function kw(d){const dt=new Date(d);dt.setHours(0,0,0,0);dt.setDate(dt.getDate()+3-(dt.getDay()+6)%7);const w1=new Date(dt.getFullYear(),0,4);return 1+Math.round(((dt-w1)/86400000-3+(w1.getDay()+6)%7)/7);}
+function renderWeek(){const mo=getMonday(weekOffset),fr=new Date(mo);fr.setDate(mo.getDate()+4);document.getElementById('week-label').textContent='KW '+kw(mo);document.getElementById('week-range').textContent=fmt(mo)+' – '+fmt(fr);const today=new Date();today.setHours(0,0,0,0);const pc=document.getElementById('day-pills');pc.innerHTML='';for(let i=0;i<5;i++){const d=new Date(mo);d.setDate(mo.getDate()+i);const isTdy=d.getTime()===today.getTime()&&weekOffset===0;const pill=document.createElement('div');pill.className='day-pill'+(i===dayIdx?' active':'')+(isTdy?' today':'');pill.innerHTML=`<span>${DAY_SHORT[i]}</span><span class="dn">${d.getDate()}</span>`;const ii=i;pill.onclick=()=>{dayIdx=ii;renderWeek();};pc.appendChild(pill);}renderDay();}
+function renderDay(){const lessons=TIMETABLE[dayIdx]||[];const ac=document.getElementById('alerts');ac.innerHTML='';lessons.filter(l=>l.st).forEach(l=>{const div=document.createElement('div');if(l.st==='cancelled'){div.className='alert-card';div.innerHTML=`<span class="alert-icon">❌</span><div class="alert-text"><strong>${l.sub} fällt aus</strong>${l.p}. Stunde (${l.s}–${l.e})</div>`;}else if(l.st==='substitution'){div.className='alert-card sub';div.innerHTML=`<span class="alert-icon">🔄</span><div class="alert-text"><strong>${l.sub} – Vertretung</strong>${l.xi||''}</div>`;}else if(l.st==='changed'){div.className='alert-card changed';div.innerHTML=`<span class="alert-icon">📍</span><div class="alert-text"><strong>${l.sub} – Änderung</strong>${l.xi||''}</div>`;}ac.appendChild(div);});const lc=document.getElementById('lessons');lc.innerHTML='';if(!lessons.length){lc.innerHTML=`<div class="empty-day"><div class="emoji">🎉</div><p>Kein Unterricht</p><span>Freier Tag!</span></div>`;return;}lessons.forEach((l,i)=>{const block=document.createElement('div');block.className='time-block';let cls='lesson-card',badge='',extra='';if(l.st==='cancelled'){cls+=' cancelled';badge='<span class="status-badge badge-cancelled">Ausfall</span>';}else if(l.st==='substitution'){cls+=' substitution';badge='<span class="status-badge badge-sub">Vertretung</span>';extra=`<div class="extra-info green">↳ ${l.xi}</div>`;}else if(l.st==='changed'){cls+=' changed';badge='<span class="status-badge badge-changed">Geändert</span>';extra=`<div class="extra-info yellow">↳ ${l.xi}</div>`;}block.style.animationDelay=(i*0.04)+'s';block.innerHTML=`<div class="time-col"><div class="time-start">${l.s}</div><div class="time-end">${l.e}</div></div><div class="${cls}" style="border-left-color:${l.c||'var(--accent)'}"> ${badge}<div class="lesson-subject">${l.sub}</div><div class="lesson-meta"><span class="meta-chip">👤 ${l.t}</span><span class="meta-chip">📍 ${l.r}</span></div>${extra}</div>`;lc.appendChild(block);});}
+function changeWeek(d){weekOffset+=d;renderWeek();}
+function setTab(idx,el){document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));el.classList.add('active');if(idx===3){if(confirm('Abmelden?')){document.getElementById('app').style.display='none';document.getElementById('login-screen').style.display='flex';}}}
+function showApp(name){currentUser=name;document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='block';document.getElementById('user-display').textContent=name;document.getElementById('avatar').textContent=name.charAt(0).toUpperCase();const td=new Date().getDay();dayIdx=td>=1&&td<=5?td-1:0;renderWeek();showInstallPrompt();}
+function doLogin(){const u=document.getElementById('username').value.trim();if(!u){alert('Bitte Benutzername eingeben.');return;}showApp(u);}
+function loadDemo(){showApp('Demo');}
+function msLoginDemo(){closeMsModal();showApp('MS365 User');}
+function openMsModal(){document.getElementById('ms-modal').classList.add('show');}
+function closeMsModal(){document.getElementById('ms-modal').classList.remove('show');}
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;if(!sessionStorage.getItem('installDismissed')){setTimeout(()=>document.getElementById('install-banner').style.display='block',2000);}});
+function triggerInstall(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;});document.getElementById('install-banner').style.display='none';}}
+function dismissInstall(){document.getElementById('install-banner').style.display='none';sessionStorage.setItem('installDismissed','1');}
+function isIos(){return /iphone|ipad|ipod/i.test(navigator.userAgent);}
+function isInStandaloneMode(){return window.matchMedia('(display-mode:standalone)').matches||window.navigator.standalone;}
+function showInstallPrompt(){if(isIos()&&!isInStandaloneMode()&&!sessionStorage.getItem('iosHintDismissed')){setTimeout(()=>{document.getElementById('ios-hint').style.display='block';},1500);}}
+window.addEventListener('load',()=>{if(isIos()&&!isInStandaloneMode()){setTimeout(()=>{document.getElementById('ios-hint').style.display='block';},3000);}});
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
+</script>
+</body>
+</html>
